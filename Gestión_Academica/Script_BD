@@ -1,0 +1,26 @@
+-- !! LA BASE DE DATOS LA UTILICE EN PHPMAYADMIN CON WAMP !!
+
+-- Crear la tabla estudiantes
+CREATE TABLE estudiantes (
+    id_estudiante INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_completo VARCHAR(255) NOT NULL,
+    correo_electronico VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Crear la tabla cursos
+CREATE TABLE cursos (
+    id_curso INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_curso VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    cantidad_creditos INT NOT NULL
+);
+
+-- Crear la tabla inscripciones
+CREATE TABLE inscripciones (
+    id_inscripcion INT PRIMARY KEY AUTO_INCREMENT,
+    id_estudiante INT NOT NULL,
+    id_curso INT NOT NULL,
+    fecha_inscripcion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_estudiante) REFERENCES estudiantes(id_estudiante),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
