@@ -35,7 +35,7 @@ class GestorSistema:
         try:
             self.cursor.execute("INSERT INTO cursos (nombre_curso, descripcion, cantidad_creditos) VALUES (%s, %s, %s)", (nombre_curso, descripcion, cantidad_creditos))
             self.conn.commit()
-            print(f"Curso '{nombre_curso}' registrado con ID: {self.cursor.lastrowid}")
+            print(f"Curso '{nombre_curso}' registrado con ID: {self.cursor.lastrowid}") ## lastrowid propiedad de lectura del la biblioteca
         except mysql.connector.Error as err:
             print(f"Error al registrar curso: {err}")
             self.conn.rollback()
