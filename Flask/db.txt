@@ -1,0 +1,26 @@
+--
+-- Base de datos: `flask_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `personas`
+--
+
+DROP TABLE IF EXISTS `personas`;
+CREATE TABLE IF NOT EXISTS `personas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Volcado de datos para la tabla `personas`
+--
+
+INSERT INTO `personas` (`id`, `nombre`) VALUES
+(1, 'Alejo'),
+(2, 'Camilo'),
+(3, 'juan');
+COMMIT;
