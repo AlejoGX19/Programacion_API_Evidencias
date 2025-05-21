@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Producto</title>
+    <link rel="stylesheet" href="/static/img/style.css">
+</head>
+<body>
+    <nav><h1>Editar Producto</h1></nav>
+
+    <section>
+        <form method="post" class="descuento-form">
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" value="{{ producto.nombre }}" required>
+            </div>
+            <div class="form-group">
+                <label>Precio Inicial:</label>
+                <input type="number" name="precio_inicial" value="{{ producto.precio_inicial }}" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Guardar Cambios</button>
+            </div>
+        </form>
+        <br>
+        <a href="/productos">← Volver a la lista</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Gestión de Inventario - Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

@@ -1,70 +1,113 @@
-from flask import Flask, render_template, request
-from descuento import aplicar_descuento
-import mysql.connector
+from fastapi import FastAPI, Request, Form # para recibir datos del formulario
+from fastapi.responses import HTMLResponse, RedirectResponse # para redireccionar
+from fastapi.staticfiles import StaticFiles # para servir archivos estáticos
+from fastapi.templating import Jinja2Templates # para renderizar HTML
+from starlette.status import HTTP_302_FOUND # para redireccionar
+from modulos.db import get_connection # para la conexión a la base de datos
+from descuento import aplicar_descuento # para aplicar el descuento
 
-app = Flask(__name__)
+app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static") # para servir archivos estáticos
+templates = Jinja2Templates(directory="templates")
+
+# Función para obtener la lista de productos
 def obtener_productos():
-    conn = mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='',
-        database='descuentos'
-    )
+    conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT nombre, precio_inicial FROM producto")
+    cursor.execute("SELECT * FROM producto")
     productos = cursor.fetchall()
     conn.close()
     return productos
 
+@app.get("/", response_class=HTMLResponse) # muestar la vista principal index.html
+async def form_index(request: Request):
+    productos = obtener_productos()
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "productos": productos,
+        "resultado": None,
+        "error": None,
+        "seleccionado": ""
+    })
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.post("/", response_class=HTMLResponse)
+async def calcular_descuento(request: Request, producto: str = Form(...), descuento: float = Form(...)):
     productos = obtener_productos()
     resultado = error = None
-    producto_seleccionado = ""
 
-    if request.method == 'POST':
-        try:
-            producto_seleccionado = request.form['producto']
-            descuento = float(request.form['descuento'])
+    try:
+        seleccionado = next((p for p in productos if p["nombre"] == producto), None)
+        if not seleccionado:
+            raise ValueError("Producto no encontrado")
 
-            # Buscar el producto por nombre
-            producto = next((p for p in productos if p['nombre'] == producto_seleccionado), None)
-            if producto is None:
-                raise ValueError("Producto no encontrado.")
-            
-            precio = producto['precio_inicial']
-            resultado = aplicar_descuento(precio, descuento)
+        precio = seleccionado["precio_inicial"]
+        resultado = aplicar_descuento(precio, descuento)
 
-            # Guardar el precio final en la base de datos
-            conexion = mysql.connector.connect(
-                host='localhost',
-                user='root',
-                password='',
-                database='descuentos'
-            )
-            cursor = conexion.cursor()
-            cursor.execute(
-                "UPDATE producto SET precio_final = %s WHERE nombre = %s",
-                (resultado, producto_seleccionado)
-            )
-            conexion.commit()
-            cursor.close()
-            conexion.close()
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE producto SET precio_final = %s WHERE nombre = %s",
+            (resultado, producto)
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        error = str(e)
+        seleccionado = producto
+        resultado = None
 
-        except ValueError as ve:
-            error = str(ve)
-        except Exception as e:
-            error = f"Ocurrió un error inesperado: {str(e)}"
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "productos": productos,
+        "resultado": resultado,
+        "error": error,
+        "seleccionado": producto
+    })
 
-    return render_template(
-        'index.html',
-        productos=productos,
-        resultado=resultado,
-        error=error,
-        seleccionado=producto_seleccionado
+@app.get("/productos", response_class=HTMLResponse) # lista los productos
+def listar_productos(request: Request):
+    productos = obtener_productos()
+    return templates.TemplateResponse("productos.html", {"request": request, "productos": productos})
+
+@app.post("/productos/agregar", response_class=HTMLResponse) # agrega un producto
+def agregar_producto(request: Request, nombre: str = Form(...), precio_inicial: int = Form(...)):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO producto (nombre, precio_inicial) VALUES (%s, %s)",
+        (nombre, precio_inicial)
     )
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.get("/productos/editar/{id}", response_class=HTMLResponse) # muestra formulario de edición
+def editar_form(request: Request, id: int):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM producto WHERE id = %s", (id,))
+    producto = cursor.fetchone()
+    conn.close()
+    return templates.TemplateResponse("editar.html", {"request": request, "producto": producto})
+
+@app.post("/productos/editar/{id}", response_class=HTMLResponse) # edita un producto
+def editar_producto(id: int, nombre: str = Form(...), precio_inicial: int = Form(...)):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE producto SET nombre = %s, precio_inicial = %s WHERE id = %s",
+        (nombre, precio_inicial, id)
+    )
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
+
+@app.get("/productos/eliminar/{id}", response_class=HTMLResponse) # elimina un producto
+def eliminar_producto(id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM producto WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
