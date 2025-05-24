@@ -6,7 +6,9 @@ from starlette.status import HTTP_302_FOUND # para redireccionar
 from modulos.db import get_connection # para la conexión a la base de datos
 from descuento import aplicar_descuento # para aplicar el descuento
 import hashlib
-import yagmail 
+import yagmail
+import re
+from fastapi import HTTPException 
 
 app = FastAPI()
 
@@ -57,6 +59,14 @@ async def register_form(request: Request):
 
 @app.post("/register", response_class=HTMLResponse)
 async def register(request: Request, nombre: str = Form(...), telefono: str = Form(...), correo: str = Form(...), password: str = Form(...)):
+    # Validar prefijo en teléfono
+    pattern = r"^\+\d{1,3}\d{7,14}$"
+    if not re.match(pattern, telefono):
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "error": "El teléfono debe incluir prefijo internacional, ejemplo: +573001234567"
+        })
+
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -138,6 +148,45 @@ async def calcular_descuento(request: Request, producto: str = Form(...), descue
         except Exception as mail_error:
             print(f"Error al enviar correo: {mail_error}")
 
+     # Envío de WhatsApp 
+        try:
+            # Obtener número de teléfono del usuario
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT telefono FROM usuario WHERE correo = %s", (correo,))
+            telefono_row = cursor.fetchone()
+            conn.close()
+
+            if not telefono_row:
+                raise ValueError("Teléfono no encontrado para el correo dado")
+
+            telefono = telefono_row[0]  
+
+            mensaje = f"""Hola!, se ha aplicado un descuento al producto '{producto}':
+- Precio original: ${precio:.2f}
+- Descuento: {descuento:.2f}%
+- Precio final: ${resultado:.2f}"""
+
+            # Configurar Twilio
+            account_sid = ""
+            auth_token = ""
+            client = None 
+            
+            if account_sid and auth_token:
+                from twilio.rest import Client
+            client = Client(account_sid, auth_token)
+
+            client.messages.create(
+                body=mensaje,
+                from_='whatsapp:+14155238886',
+                to=f'whatsapp:{telefono}'
+            )
+            mensaje_whatsapp = f"Mensaje WhatsApp enviado correctamente a {telefono}"
+            print(mensaje_whatsapp)
+        except Exception as wa_error:
+            mensaje_whatsapp = f"Error al enviar WhatsApp: {wa_error}"
+            print(mensaje_whatsapp)
+
     except Exception as e:
         error = str(e)
         seleccionado = producto
@@ -148,8 +197,11 @@ async def calcular_descuento(request: Request, producto: str = Form(...), descue
         "productos": productos,
         "resultado": resultado,
         "error": error,
-        "seleccionado": producto
+        "seleccionado": producto,
+        "mensaje_whatsapp": mensaje_whatsapp  
     })
+
+
 
 @app.get("/productos", response_class=HTMLResponse) # lista los productos
 def listar_productos(request: Request):
