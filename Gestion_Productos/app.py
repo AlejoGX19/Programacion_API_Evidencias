@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates # para renderizar HTML
 from starlette.status import HTTP_302_FOUND # para redireccionar
 from modulos.db import get_connection # para la conexión a la base de datos
 from descuento import aplicar_descuento # para aplicar el descuento
+import hashlib
+import yagmail 
 
 app = FastAPI()
 
@@ -13,6 +15,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Directorio de plantillas
 templates = Jinja2Templates(directory="templates")
+
+def obtener_productos():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM producto")
+    productos = cursor.fetchall()
+    conn.close()
+    return productos
+
 
 # Hashear contraseñas
 def hash_password(password: str) -> str:
@@ -29,7 +40,16 @@ async def login(request: Request, correo: str = Form(...), password: str = Form(
     cursor.execute("SELECT * FROM usuario WHERE correo = %s", (correo,))
     usuario = cursor.fetchone()
     conn.close()
-    return productos
+
+    if usuario and usuario["password"] == hash_password(password):
+        response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+        response.set_cookie(key="usuario_logueado", value=correo)
+        return response
+    else:
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": "Correo o contraseña incorrectos"
+        })
 
 @app.get("/register", response_class=HTMLResponse)
 async def register_form(request: Request):
@@ -75,8 +95,11 @@ async def form_index(request: Request):
         "seleccionado": ""
     })
 
+EMAIL_SENDER = "josevasqz010406@gmail.com"
+EMAIL_PASSWORD = "bkpt adbc uydl jign"
+
 @app.post("/", response_class=HTMLResponse)
-async def calcular_descuento(request: Request, producto: str = Form(...), descuento: float = Form(...)):
+async def calcular_descuento(request: Request, producto: str = Form(...), descuento: float = Form(...), correo: str = Form(...)):
     productos = obtener_productos()
     resultado = error = None
 
@@ -96,6 +119,25 @@ async def calcular_descuento(request: Request, producto: str = Form(...), descue
         )
         conn.commit()
         conn.close()
+
+        # Envío de correo
+        try:
+            subject = f"Descuento aplicado: {producto}"
+            body = [
+                f"Hola,",
+                f"Se ha aplicado un descuento al producto '{producto}'.",
+                f"Precio inicial: ${precio:.2f}",
+                f"Descuento: {descuento:.2f}%",
+                f"Precio final: ${resultado:.2f}",
+                "Saludos,"
+            ]
+
+            yag = yagmail.SMTP(EMAIL_SENDER, EMAIL_PASSWORD)
+            yag.send(to=correo, subject=subject, contents=body)
+            print(f"Correo enviado exitosamente a {correo}")
+        except Exception as mail_error:
+            print(f"Error al enviar correo: {mail_error}")
+
     except Exception as e:
         error = str(e)
         seleccionado = producto
@@ -126,11 +168,13 @@ def agregar_producto(request: Request, nombre: str = Form(...), precio_inicial: 
     conn.close()
     return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
 
-@app.get("/productos/editar/{id}", response_class=HTMLResponse) # muestra formulario de edición
+@app.get("/productos/editar/{id}", response_class=HTMLResponse)
 def editar_form(request: Request, id: int):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM producto")
-    productos = cursor.fetchall()
+    cursor.execute("SELECT * FROM producto WHERE id = %s", (id,))
+    producto = cursor.fetchone()
     conn.close()
-    return productos
+    if not producto:
+        return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("editar_producto.html", {"request": request, "producto": producto})
