@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates # para renderizar HTML
 from starlette.status import HTTP_302_FOUND # para redireccionar
 from modulos.db import get_connection # para la conexión a la base de datos
 from descuento import aplicar_descuento # para aplicar el descuento
+import yagmail # para enviar correos electrónicos
 
 app = FastAPI()
 
@@ -18,7 +19,7 @@ def obtener_productos():
     cursor.execute("SELECT * FROM producto")
     productos = cursor.fetchall()
     conn.close()
-    return productos
+    return productos 
 
 @app.get("/", response_class=HTMLResponse) # muestar la vista principal index.html
 async def form_index(request: Request):
@@ -31,8 +32,11 @@ async def form_index(request: Request):
         "seleccionado": ""
     })
 
+EMAIL_SENDER = "josevasqz010406@gmail.com"
+EMAIL_PASSWORD = "bkpt adbc uydl jign"
+
 @app.post("/", response_class=HTMLResponse)
-async def calcular_descuento(request: Request, producto: str = Form(...), descuento: float = Form(...)):
+async def calcular_descuento(request: Request, producto: str = Form(...), descuento: float = Form(...), correo: str = Form(...)):
     productos = obtener_productos()
     resultado = error = None
 
@@ -52,6 +56,25 @@ async def calcular_descuento(request: Request, producto: str = Form(...), descue
         )
         conn.commit()
         conn.close()
+
+        # Envío de correo
+        try:
+            subject = f"Descuento aplicado: {producto}"
+            body = [
+                f"Hola,",
+                f"Se ha aplicado un descuento al producto '{producto}'.",
+                f"Precio inicial: ${precio:.2f}",
+                f"Descuento: {descuento:.2f}%",
+                f"Precio final: ${resultado:.2f}",
+                "Saludos,"
+            ]
+
+            yag = yagmail.SMTP(EMAIL_SENDER, EMAIL_PASSWORD)
+            yag.send(to=correo, subject=subject, contents=body)
+            print(f"Correo enviado exitosamente a {correo}")
+        except Exception as mail_error:
+            print(f"Error al enviar correo: {mail_error}")
+
     except Exception as e:
         error = str(e)
         seleccionado = producto
