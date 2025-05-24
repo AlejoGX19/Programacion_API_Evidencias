@@ -1,69 +1,102 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
 }
 
 nav {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
-    text-align: center;
+  background-color: #131c75;
+  color: #fff;
+  padding: 15px;
+  height: 50px;
+  text-align: center;
+  font-size: 15px;
 }
 
 section {
-    padding: 2rem;
-    background-color: #fff;
-    margin: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 2rem;
+  margin: 2rem auto;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-footer {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
-    text-align: center;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
+table,
+tr,
+td,
+th {
+  border: 1px solid #00000053;
+  width: 100%;
+  
+  padding: 0.5rem;
+  text-align: center;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  margin: auto;
+}
+th {
+  background-color: #41b4c3;
+  color: #000000;
 }
 
-.container {
-    max-width: 600px;
-    max-height: max-content;
-    margin: 80px auto;
-    background-color: white;
-    padding: 2em;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    text-align: center;
+.descuento-form .form-group {
+  margin-bottom: 1.5rem;
 }
 
-input[type="text"], input[type="email"], input[type="password"] {
-    width: 350px;
-    padding: 0.8em;
-    margin: 0.5em 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+.descuento-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
 }
 
-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    padding: 0.8em 1.2em;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
+.descuento-form input,
+.descuento-form select,
+.descuento-form button {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
-button:hover {
-    background-color: #0056b3;
+.descuento-form button {
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.descuento-form button:hover {
+  background-color: #555;
+}
+
+.resultado,
+.error {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.resultado {
+  background-color: #e0ffe0;
+  color: #007500;
 }
 
 .error {
-    color: red;
-    margin-bottom: 1em;
+  background-color: #ffe0e0;
+  color: #750000;
+}
+
+footer {
+  background-color: #131c75;
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+  position: fixed;
+  height: 50px;
+  bottom: 0;
+  width: 100%;
 }
