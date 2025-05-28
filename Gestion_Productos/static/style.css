@@ -100,3 +100,12 @@ footer {
   bottom: 0;
   width: 100%;
 }
+
+a i,
+a:visited i,
+a:hover i,
+a:active i,
+a:focus i {
+    color: #333 !important; 
+    transition: none !important;
+}

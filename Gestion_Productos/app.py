@@ -163,11 +163,13 @@ async def calcular_descuento(request: Request, producto: str = Form(...), descue
             telefono = telefono_row[0]  
 
             mensaje = f"""Hola!, se ha aplicado un descuento al producto '{producto}':
-- Precio original: ${precio:.2f}
-- Descuento: {descuento:.2f}%
-- Precio final: ${resultado:.2f}"""
+            - Precio original: ${precio:.2f}
+            - Descuento: {descuento:.2f}%
+            - Precio final: ${resultado:.2f}"""
 
-            # Configurar Twilio
+            # Configurar Twilio 
+            # desponer tu credenciales de acceso a Twilio
+            # Asegúrate de instalar la librería Twilio: pip install twilio
             account_sid = ""
             auth_token = ""
             client = None 
@@ -229,4 +231,25 @@ def editar_form(request: Request, id: int):
     conn.close()
     if not producto:
         return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
-    return templates.TemplateResponse("editar_producto.html", {"request": request, "producto": producto})
+    return templates.TemplateResponse("editar.html", {"request": request, "producto": producto})
+
+@app.post("/productos/editar/{id}", response_class=HTMLResponse) # edita un producto
+def editar_producto(id: int, nombre: str = Form(...), precio_inicial: int = Form(...)):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE producto SET nombre = %s, precio_inicial = %s WHERE id = %s",
+        (nombre, precio_inicial, id)
+    )
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
+
+@app.get("/productos/eliminar/{id}", response_class=HTMLResponse) # elimina un producto
+def eliminar_producto(id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM producto WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/productos", status_code=HTTP_302_FOUND)
