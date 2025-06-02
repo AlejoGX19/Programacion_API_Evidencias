@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+</head>
+<body>
+    <head>
+
+    </head>
+    <section>
+
+    </section>
+    <script>
+        // for (let people=1; people <= 3; people++) {
+        //     var ege = prompt("Introduce tu Edad: ");
+        //     const ageParameter = 18;
+        //     if (ege >= ageParameter) {
+        //         alert("Eres un Adulto.");
+        //     } else {
+        //         alert("Eeres un Niño.");
+        //     }
+        // }
+
+        // ------------------------------------------------
+
+        // var cars = ["Toyota", "Honda", "Ford", "Chevrolet", "Nissan"];
+        
+        // for (let brands = 0; brands < cars.length; brands++) {
+        //     const viewCars = cars[brands] + "," + "<br>";
+        //     document.write(viewCars);
+        // }
+
+        // const viewCarsTree = cars[2];
+        // const viewCarsFour = cars[3];
+        // document.write("<br>El tercer coche es: " + viewCarsTree + "<br>");
+        // document.write("El cuerto coche es: " + viewCarsFour + "<br>");
+
+        // ------------------------------------------------
+
+        // var  cars = ["Toyota", "Honda", "Ford", "Chevrolet", "Nissan"];
+        // cars.forEach(function(brands) {
+        //     const viewCars = brands + "<br>";
+        //     document.write(viewCars)
+        // });
+
+        // ------------------------------------------------
+
+        // function student(){
+        //     var studentName = "";
+        //     while (studentName.toUpperCase() != "NN"){
+        //         studentName = prompt("Introduce el nombre del estudiante (o 'NN' para salir):");
+        //         alert("El nombre del estudiante es: " + studentName);
+        //     }
+        // }
+        // student();
+
+        // -------------------------------------------------
+
+        // var age = 0;
+        // while (age != 150){
+        //     age = parseInt(prompt("Introduce tu edad (o 150 para salir):"));
+        //     if (age >= 18) {
+        //         alert("Bienvennido");
+        //     } else {
+        //         alert("Lo siento, no puedes ingresar.");
+        //     }
+        // }
+
+        // -------------------------------------------------
+
+        var age = 0;
+        var count = -1;
+        var totalAge = 0; averageAge = 0;
+        do {
+            age = parseInt(prompt("Introduce tu edad:"));
+            if (age <= 18) {
+                alert(" lo siento, no puedes ingresar.");
+            } else {
+                alert("bienvenido");
+            }
+            totalAge = totalAge + age;
+            count++;
+        } while (age != 0);
+        averageAge = parseInt(totalAge / count);
+        document.write("La cantidad de personas es: " + count + "y el promedio de edad es: " + averageAge + "<br>");
+
+
+    </script>
+    <footer>
+        <!-- &copy; 2025 - Alejandro Sepúlveda Ramirez -->
+    </footer>
+</body>
+</html>
