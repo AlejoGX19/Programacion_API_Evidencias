@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 15-05-2025 a las 16:16:41
+-- Tiempo de generación: 29-05-2025 a las 05:25:07
 -- Versión del servidor: 8.2.0
 -- Versión de PHP: 8.2.13
 
@@ -33,21 +33,22 @@ CREATE TABLE IF NOT EXISTS `producto` (
   `nombre` varchar(100) DEFAULT NULL,
   `precio_inicial` int DEFAULT NULL,
   `precio_final` int DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `usuario_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_usuario` (`usuario_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Volcado de datos para la tabla `producto`
 --
 
-INSERT INTO `producto` (`id`, `nombre`, `precio_inicial`, `precio_final`) VALUES
-(1, 'Buzo de algodón perchado', 45000, 22500),
-(2, 'Tanga brasilera', 35000, NULL),
-(3, 'Jeans vaquero', 35000, NULL),
-(4, 'Polera Arturo Calle', 95000, NULL),
-(5, 'Blusa Yaqueline - Edicion especial', 300000, 120000),
-(6, 'Sudadera cargo', 55000, NULL);
-COMMIT;
+INSERT INTO `producto` (`id`, `nombre`, `precio_inicial`, `precio_final`, `usuario_id`) VALUES
+(1, 'Buzo de algodón perchado', 45000, 450, 4),
+(2, 'Tanga brasilera', 35000, 9100, NULL),
+(3, 'Jeans vaquero', 35000, 15750, 4),
+(4, 'Polera Arturo Calle', 95000, 76000, NULL),
+(5, 'Blusa Yaqueline - Edicion especial', 300000, 264000, 4),
+(6, 'Sudadera cargo', 55000, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -64,18 +65,17 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `telefono` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `correo` (`correo`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
 INSERT INTO `usuario` (`id`, `nombre`, `correo`, `password`, `telefono`) VALUES
-(6, 'Jose', 'mile23@gmail.com', 'a58385ab678afdedbd2f7c61ba56c599c51572d50a70843fd10294461e2cb96f', '+57332423421'),
-(4, 'Isabel', 'milenasulbaran2006@gmail.com', '6428e6ea9b23e0c6ff6522a555f0e6b6acaa41cd2a02a0b41da1e162c07ead36', '+573024396018'),
-(2, 'Milena Isabel', 'milecosita.rara@gmail.com', '15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225', '3241243232'),
 (1, 'Alejandro Agudelo', 'jaav010406@gmail.com', '15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225', '3046304674'),
-(7, 'Alejandro', 'alejandroramirez06072005@gmail.com', 'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f', '+571234567890');
+(2, 'Milena Isabel', 'milecosita.rara@gmail.com', '15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225', '3241243232'),
+(4, 'Isabel', 'milenasulbaran2006@gmail.com', '6428e6ea9b23e0c6ff6522a555f0e6b6acaa41cd2a02a0b41da1e162c07ead36', '+573024396018'),
+(6, 'Jose', 'mile23@gmail.com', 'a58385ab678afdedbd2f7c61ba56c599c51572d50a70843fd10294461e2cb96f', '+573046331112');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

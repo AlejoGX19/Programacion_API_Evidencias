@@ -50,6 +50,9 @@
             <p>Monto final con descuento para <strong>{{ seleccionado }}</strong>: ${{ resultado }}</p>
         </div>
         {% endif %}
+        {% if id_usuario %}
+    <p>Descuento aplicado por el usuario con ID: {{ id_usuario }}</p>
+        {% endif %}
 
         {% if error %}
         <div class="error">
